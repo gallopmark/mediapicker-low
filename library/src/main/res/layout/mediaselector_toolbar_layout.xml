@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pony.xcode.media.widget.MediaTitleView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolBar"
+    app:mtv_titleText="@string/mediapicker_image_title"
+    style="@style/ToolBarStyle">
+
+    <FrameLayout
+        android:id="@+id/mConfirmLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|center"
+        android:layout_marginEnd="@dimen/toolbar_confirm_margin"
+        android:layout_marginRight="@dimen/toolbar_confirm_margin"
+        android:foreground="@drawable/bg_foreground_corners3dp_selector">
+
+        <TextView
+            android:id="@+id/mConfirmTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_green_shape_3dp"
+            android:gravity="center"
+            android:minWidth="@dimen/toolbar_confirm_viewMinWidth"
+            android:padding="@dimen/dp_5"
+            android:text="@string/mediapicker_confirm"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_14" />
+    </FrameLayout>
+</pony.xcode.media.widget.MediaTitleView>

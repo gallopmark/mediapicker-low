@@ -1,0 +1,27 @@
+<resources>
+    <string name="mediapicker_allpictures">全部图片</string>
+    <string name="mediapicker_image_title">图片</string>
+    <string name="mediapicker_video_title">视频</string>
+    <string name="mediapicker_allvideos">全部视频</string>
+    <string name="mediapicker_confirm">确定</string>
+    <string name="mediapicker_preview">预览</string>
+    <string name="mediapicker_select">选择</string>
+
+    <string name="mediapicker_dismiss_external_permissions">禁止存储权限应用无法读取系统相册，请重新打开</string>
+    <string name="mediapicker_banned_external_permissions">存储权限已被禁止，应用无法读取系统相册,如需打开请点“确定”</string>
+    <string name="mediapicker_banned_camera_permission">相机权限已被禁止，应用无法启动照相机，如需打开请点“确定”</string>
+    <string name="mediapicker_dismiss_camera_permission">禁止相机权限应用无法启动相机，请重新打开</string>
+    <string name="mediapicker_open_camera_failure">相机不可用</string>
+
+    <string name="mediapicker_time_today">今天</string>
+    <string name="mediapicker_time_current_week">本周</string>
+    <string name="mediapicker_time_current_month">本月</string>
+    <string name="mediapicker_dialog_title">提示</string>
+    <string name="mediapicker_dialog_confirm">确定</string>
+    <string name="mediapicker_dialog_cancel">取消</string>
+
+    <string name="mediapicker_play_video_error">无法播放此视频</string>
+
+    <string name="mediapicker_camera_image">拍摄图片</string>
+    <string name="mediapicker_camera_video">录制视频</string>
+</resources>

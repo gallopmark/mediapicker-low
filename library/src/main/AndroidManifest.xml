@@ -1,0 +1,39 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="pony.xcode.media">
+    <!--储存卡的读写权限-->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!--//调用相机权限-->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!--Android Q 默认开启沙箱模式 导致出现文件读写失败-->
+    <application
+        android:requestLegacyExternalStorage="true"
+        tools:targetApi="q">
+
+        <provider
+            android:name=".CaptureFileProvider"
+            android:authorities="${applicationId}.provider"
+            android:enabled="true"
+            android:exported="false"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/mediaselector_capture_path" />
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+
+        <activity
+            android:name=".MediaPickerActivity"
+            android:launchMode="singleTop" />
+
+        <activity
+            android:name=".MediaPreviewActivity"
+            android:launchMode="singleTop" />
+    </application>
+</manifest>
