@@ -371,10 +371,6 @@ public class MediaPickerActivity extends MediaBaseActivity implements View.OnCli
         }
         //因为图片的实体类是Image，而我们返回的是String数组，所以要进行转换。
         ArrayList<MediaBean> selectImages = mGridAdapter.getSelectedItems();
-//        ArrayList<String> images = new ArrayList<>();
-//        for (MediaBean image : selectImages) {
-//            images.add(image.getPath());
-//        }
         //点击确定，把选中的图片通过Intent传给上一个Activity。
         mPresenter.setResult(RESULT_OK, selectImages, false);
         finish();

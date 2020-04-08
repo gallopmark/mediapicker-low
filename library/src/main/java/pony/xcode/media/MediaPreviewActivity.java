@@ -30,7 +30,6 @@ import java.util.List;
 public class MediaPreviewActivity extends MediaBaseActivity implements MediaPreviewView {
     private FrameLayout mContainer;
     private Toolbar toolBar;
-//    private TextView mTitleTv;
     private FrameLayout mConfirmLayout;
     private TextView mConfirmTv;
     private ViewPager mViewPager;
@@ -139,14 +138,19 @@ public class MediaPreviewActivity extends MediaBaseActivity implements MediaPrev
             mConfirmLayout.setEnabled(false);
         } else {
             mConfirmLayout.setEnabled(true);
-            textConfirm = textConfirm + "(" + count + ")";
+            if (isSingle) {
+                textConfirm = getString(R.string.mediapicker_confirm);
+            } else if (mMaxCount > 0) {
+                textConfirm = textConfirm + "(" + count + "/" + mMaxCount + ")";
+            } else {
+                textConfirm = textConfirm + "(" + count + ")";
+            }
         }
         mConfirmTv.setText(textConfirm);
     }
 
     @Override
     public void initViewPager() {
-//        ImagePagerAdapter pagerAdapter = new ImagePagerAdapter(this, mImages);
         mViewPager.clearOnPageChangeListeners();
         mViewPager.setOffscreenPageLimit(1);
         int initPosition = getIntent().getIntExtra(MediaPicker.POSITION, 0);
@@ -217,18 +221,18 @@ public class MediaPreviewActivity extends MediaBaseActivity implements MediaPrev
                     } else {
                         mSelectImages.remove(mediaBean);
                     }
-                    setUnCheckItem();
+                    toggle(false);
                 } else {
                     /*单选情况下 清空已选图片再添加选中图片*/
                     if (isSingle) {
                         mSelectImages.clear();
                         mSelectImages.add(mediaBean);
-                        setCheckItem();
+                        toggle(true);
                     } else {
                         /*未指定maxCount 或者选择的数量没有超过maxCount*/
                         if (mMaxCount == 0 || mSelectImages.size() < mMaxCount) {
                             mSelectImages.add(mediaBean);
-                            setCheckItem();
+                            toggle(true);
                         }
                     }
                 }
@@ -238,27 +242,20 @@ public class MediaPreviewActivity extends MediaBaseActivity implements MediaPrev
     }
 
     private void setCheckStatus(int position) {
-        if (position < 0 || position > mImages.size()) return;
-        int index = mSelectImages.indexOf(mImages.get(position));
-        if (index >= 0 && index < mSelectImages.size()) {
-            setCheckItem();
-        } else {
-            setUnCheckItem();
+        if (position >= 0 && position < mImages.size()) {
+            toggle(mSelectImages.contains(mImages.get(position)));
         }
     }
 
-    private void setCheckItem() {
-        mSelectTextView.setCompoundDrawablesWithIntrinsicBounds(mSelectDrawable, null, null, null);
-    }
-
-    private void setUnCheckItem() {
-        mSelectTextView.setCompoundDrawablesWithIntrinsicBounds(mUnSelectDrawable, null, null, null);
+    //改变选择状态
+    private void toggle(boolean isChecked) {
+        mSelectTextView.setCompoundDrawablesWithIntrinsicBounds(isChecked ? mSelectDrawable : mUnSelectDrawable, null, null, null);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if(mViewPager.getAdapter() instanceof VideoPagerAdapter){
+        if (mViewPager.getAdapter() instanceof VideoPagerAdapter) {
             VideoPagerAdapter adapter = (VideoPagerAdapter) mViewPager.getAdapter();
             adapter.resume();
         }
@@ -267,7 +264,7 @@ public class MediaPreviewActivity extends MediaBaseActivity implements MediaPrev
     @Override
     protected void onPause() {
         super.onPause();
-        if(mViewPager.getAdapter() instanceof VideoPagerAdapter){
+        if (mViewPager.getAdapter() instanceof VideoPagerAdapter) {
             VideoPagerAdapter adapter = (VideoPagerAdapter) mViewPager.getAdapter();
             adapter.pause();
         }
@@ -275,7 +272,7 @@ public class MediaPreviewActivity extends MediaBaseActivity implements MediaPrev
 
     @Override
     protected void onDestroy() {
-        if(mViewPager.getAdapter() instanceof VideoPagerAdapter){
+        if (mViewPager.getAdapter() instanceof VideoPagerAdapter) {
             VideoPagerAdapter adapter = (VideoPagerAdapter) mViewPager.getAdapter();
             adapter.destroy();
         }
