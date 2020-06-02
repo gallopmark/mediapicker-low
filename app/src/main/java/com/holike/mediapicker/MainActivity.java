@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,7 +70,8 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         mAdapter = new ImageAdapter(this, images);
         recyclerView.setAdapter(mAdapter);
-        MediaPicker.builder().maxSelectCount(30)
+        MediaPicker.videoBuilder().maxSelectCount(10)
+                .sizeLimit(80 * 1024 * 1024) //80M
 //                .sizeLimit(5 * 1024 * 1024)
                 .start(this);
     }
@@ -85,5 +88,16 @@ public class MainActivity extends AppCompatActivity {
                 mAdapter.notifyDataSetChanged();
             }
         }
+    }
+
+    public static Bitmap getVideoThumbnail(String videoPath, int kind, int width, int height) {
+        Bitmap bitmap;
+        // 获取视频的缩略图
+        bitmap = ThumbnailUtils.createVideoThumbnail(videoPath, kind);
+        if (width > 0 && height > 0) {
+            bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height,
+                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+        }
+        return bitmap;
     }
 }

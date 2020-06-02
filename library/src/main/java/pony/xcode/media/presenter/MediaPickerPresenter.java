@@ -9,11 +9,9 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -23,8 +21,10 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import pony.xcode.media.CaptureMachine;
 import pony.xcode.media.MediaConfig;
 import pony.xcode.media.R;
+import pony.xcode.media.VideoConfig;
 import pony.xcode.media.bean.MediaFolder;
 import pony.xcode.media.bean.MediaBean;
 import pony.xcode.media.dialog.PictureLoadingDialog;
@@ -56,8 +56,7 @@ public class MediaPickerPresenter {
     private boolean isShowTime;
 
     private int mChooseMode;
-    private String mPhotoPath;  //拍照后的路径
-    private String mVideoPath; //录制视频后的路径
+    private CaptureMachine mCaptureMachine; //拍照或录像
 
     private PictureLoadingDialog mLoadingDialog;
 
@@ -144,7 +143,7 @@ public class MediaPickerPresenter {
 
     public void changeTime(TextView tvDatetime, MediaBean image) {
         if (image != null) {
-            String time = DateUtils.getImageTime(activity, image.getTime() * 1000);
+            String time = DateUtils.getImageTime(activity, image.getTime());
             tvDatetime.setText(time);
             showTime(tvDatetime);
             if (mHide == null) {
@@ -315,60 +314,25 @@ public class MediaPickerPresenter {
 
     /*调起相机拍照*/
     private void startImageCapture() {
-        Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (captureIntent.resolveActivity(activity.getPackageManager()) != null) {
-            try {
-                File photoFile = MediaUtil.createImageFile(activity.getApplicationContext());
-                if (photoFile != null) {
-                    //通过FileProvider创建一个content类型的Uri
-                    Uri imageUri = MediaUtil.getProviderUri(activity, photoFile);
-                    mPhotoPath = photoFile.getAbsolutePath();
-                    captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-                    captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                    activity.startActivityForResult(captureIntent, IMAGE_CAPTURE_CODE);
-                }
-            } catch (Exception e) {
-                mPhotoPath = null;
-                DialogUtils.showUnusableCamera(activity);
-            }
-        } else {
-            DialogUtils.showUnusableCamera(activity);
+        if (mCaptureMachine == null) {
+            mCaptureMachine = CaptureMachine.from(activity);
         }
+        mCaptureMachine.startImageCapture(IMAGE_CAPTURE_CODE);
     }
 
     //录制视频
     private void startVideoCapture() {
-        Intent captureIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-        if (captureIntent.resolveActivity(activity.getPackageManager()) != null) {
-            try {
-                File photoFile = MediaUtil.createVideoFile(activity);
-                if (photoFile != null) {
-                    //通过FileProvider创建一个content类型的Uri
-                    Uri videoUri = MediaUtil.getProviderUri(activity, photoFile);
-                    mVideoPath = photoFile.getAbsolutePath();
-                    Bundle extras = activity.getIntent().getExtras();
-                    if (extras != null) {
-                        int durationLimit = extras.getInt(MediaPicker.DURATION_LIMIT, 0);
-                        if (durationLimit > 0) {
-                            captureIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, durationLimit);
-                        }
-                        captureIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, extras.getInt(MediaPicker.VIDEO_QUALITY, MediaConfig.DEFAULT_VIDEO_QUALITY));
-                        long sizeLimit = extras.getLong(MediaPicker.SIZE_LIMIT, 0);
-                        if (sizeLimit > 0) {  //限制了录制大小 则限制的录制时间将不起作用
-                            captureIntent.putExtra(MediaStore.EXTRA_SIZE_LIMIT, sizeLimit);
-                        }
-                    }
-                    captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri);
-                    captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                    activity.startActivityForResult(captureIntent, VIDEO_CAPTURE_CODE);
-                }
-            } catch (Exception e) {
-                mVideoPath = null;
-                DialogUtils.showUnusableCamera(activity);
-            }
-        } else {
-            DialogUtils.showUnusableCamera(activity);
+        if (mCaptureMachine == null) {
+            mCaptureMachine = CaptureMachine.from(activity);
         }
+        VideoConfig.Builder builder = new VideoConfig.Builder();
+        Bundle extras = activity.getIntent().getExtras();
+        if (extras != null) {
+            builder.setDurationLimit(extras.getInt(MediaPicker.DURATION_LIMIT, 0))
+                    .setSizeLimit(extras.getLong(MediaPicker.SIZE_LIMIT, 0))
+                    .setQuality(extras.getInt(MediaPicker.VIDEO_QUALITY, MediaConfig.DEFAULT_VIDEO_QUALITY));
+        }
+        mCaptureMachine.startVideoCapture(VIDEO_CAPTURE_CODE, builder.build());
     }
 
     public boolean isLoadImage() {
@@ -376,11 +340,8 @@ public class MediaPickerPresenter {
     }
 
     public void onActivityResult(int requestCode, int resultCode) {
-        //拍照成功返回路径
-        if (requestCode == IMAGE_CAPTURE_CODE && resultCode == Activity.RESULT_OK && mPhotoPath != null) {
-            setCaptureResult(mPhotoPath);
-        } else if (requestCode == VIDEO_CAPTURE_CODE && resultCode == Activity.RESULT_OK && mVideoPath != null) {
-            setCaptureResult(mVideoPath);
+        if (mCaptureMachine != null) {
+            setCaptureResult(mCaptureMachine.getFilePath(requestCode, resultCode));
         }
     }
 
